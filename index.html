@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zinnia All Day</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo" onclick="showPage('playlists')">
+      <svg width="34" height="26" viewBox="0 0 36 28" fill="none">
+        <path d="M18 2C18 2 10 2 6 8C4 11 4 14 4 14s0 3 2 6c4 6 12 6 12 6s8 0 12-6c2-3 2-6 2-6s0-3-2-6C26 2 18 2 18 2Z" stroke="white" stroke-width="2.5" fill="none"/>
+        <path d="M18 2c0 0-4 4-4 12s4 12 4 12" stroke="white" stroke-width="2.5"/>
+        <path d="M18 2c0 0 4 4 4 12s-4 12-4 12" stroke="white" stroke-width="2.5"/>
+        <path d="M4 14h28" stroke="white" stroke-width="2.5"/>
+        <circle cx="18" cy="2" r="2" fill="white"/>
+        <circle cx="28" cy="6" r="2" fill="white"/>
+        <circle cx="8" cy="6" r="2" fill="white"/>
+      </svg>
+      <span>zinnia</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showPage('browse')" data-page="browse">Browse</a></li>
+      <li><a href="#" onclick="showPage('playlists')" data-page="playlists">Channels</a></li>
+      <li><a href="#" onclick="showPage('schedule')" data-page="schedule">All Day</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="icon-btn" onclick="toggleSearch()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <div class="avatar">Z</div>
+    </div>
+  </div>
+  <div class="nav-search" id="navSearch">
+    <input type="text" placeholder="Search videos, genres, channels…" id="globalSearch" />
+  </div>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 — CREATE PLAYLISTS
+══════════════════════════════════════════ -->
+<div id="page-playlists" class="page active">
+  <div class="page-header">
+    <div>
+      <h1>Create Playlists</h1>
+      <p class="subtext">Browse videos, filter by genre, and build your playlists.</p>
+    </div>
+    <div class="header-actions">
+      <div class="selected-badge" id="selectedBadge" style="display:none">
+        <span id="selectedCount">0</span> selected
+      </div>
+      <button class="btn-ghost" onclick="openVimeoModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Configure Vimeo
+      </button>
+      <button class="btn-secondary" onclick="openSaveModal()">Save as Playlist</button>
+      <button class="btn-primary" onclick="openScheduleChooser()">
+        Schedule
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search videos…" id="videoSearch" oninput="filterVideos()" />
+    </div>
+    <div class="genre-pills" id="genrePills">
+      <button class="pill active" onclick="selectGenre(this,'All')">All</button>
+      <button class="pill" onclick="selectGenre(this,'Daily Living')">Daily Living</button>
+      <button class="pill" onclick="selectGenre(this,'Animals')">Animals</button>
+      <button class="pill" onclick="selectGenre(this,'Caregiver Education')">Caregiver Education</button>
+      <button class="pill" onclick="selectGenre(this,'Exercise & Meditation')">Exercise &amp; Meditation</button>
+      <button class="pill" onclick="selectGenre(this,'Faith')">Faith</button>
+      <button class="pill" onclick="selectGenre(this,'Fun & Games')">Fun &amp; Games</button>
+      <button class="pill" onclick="selectGenre(this,'Holidays')">Holidays</button>
+      <button class="pill" onclick="selectGenre(this,'Interests')">Interests</button>
+      <button class="pill" onclick="selectGenre(this,'Nature')">Nature</button>
+      <button class="pill" onclick="selectGenre(this,'Quizzes')">Quizzes</button>
+    </div>
+  </div>
+
+  <div class="content-layout">
+    <div class="video-grid" id="videoGrid">
+      <div class="loading-state" id="videoLoading">
+        <div class="spinner"></div>
+        <p>Loading videos from Vimeo…</p>
+      </div>
+    </div>
+    <aside class="playlist-sidebar">
+      <div class="sidebar-section">
+        <h3>My Playlists</h3>
+        <div id="playlistList"></div>
+        <button class="btn-ghost full-width" style="margin-top:8px" onclick="openSaveModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Playlist
+        </button>
+      </div>
+      <div class="sidebar-section">
+        <h3>Current Selection</h3>
+        <div id="selectedVideosList" class="selected-videos"></div>
+        <p id="noSelectionMsg" class="empty-msg">Select videos above to add them here.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 — SCHEDULE: TIME-OF-DAY
+══════════════════════════════════════════ -->
+<div id="page-schedule" class="page">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:14px">
+      <h1 id="scheduleMonthTitle">April 2026</h1>
+      <div class="month-nav">
+        <button class="icon-btn dark" onclick="changeMonth(-1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="icon-btn dark" onclick="changeMonth(1)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost" onclick="showPage('playlists')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Playlists
+      </button>
+      <button class="mode-toggle-btn" onclick="showPage('queue-schedule')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
+        Queue Mode
+      </button>
+      <button class="btn-primary" onclick="showPage('player')">Play Now</button>
+    </div>
+  </div>
+
+  <div class="schedule-layout">
+    <div class="calendar-panel">
+      <div class="week-header" id="weekHeader"></div>
+      <div class="calendar-body">
+        <div class="time-col" id="timeCol"></div>
+        <div class="day-cols" id="dayCols"></div>
+      </div>
+    </div>
+    <div class="schedule-sidebar">
+      <div class="panel-card">
+        <h3 class="panel-title">My Playlists</h3>
+        <p class="panel-hint">Drag a playlist onto the calendar to schedule it.</p>
+        <div id="schedulePlaylists"></div>
+        <p class="empty-msg" id="scheduleNoPlaylists" style="display:none">
+          No playlists yet. <a href="#" onclick="showPage('playlists')">Create one first →</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — SCHEDULE: QUEUE MODE
+══════════════════════════════════════════ -->
+<div id="page-queue-schedule" class="page">
+  <div class="page-header">
+    <div>
+      <h1>Queue Schedule</h1>
+      <p class="subtext">Arrange playlists in the order they should play.</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-ghost" onclick="showPage('playlists')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Playlists
+      </button>
+      <button class="mode-toggle-btn" onclick="showPage('schedule')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Time-of-Day Mode
+      </button>
+      <button class="btn-primary" onclick="showPage('player')">Play Queue</button>
+    </div>
+  </div>
+
+  <div class="queue-schedule-layout">
+    <div class="panel-card qs-available">
+      <h3 class="panel-title">Available Playlists</h3>
+      <p class="panel-hint">Drag into your queue →</p>
+      <div id="qsAvailable"></div>
+    </div>
+    <div class="panel-card qs-queue">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <h3 class="panel-title" style="margin-bottom:0">Play Queue</h3>
+        <button class="btn-ghost" style="font-size:0.78rem;padding:4px 10px" onclick="clearQueue()">Clear all</button>
+      </div>
+      <p class="panel-hint">Drop playlists here, then reorder freely.</p>
+      <div id="qsQueueList" class="qs-dropzone">
+        <p class="empty-msg" id="qsEmptyMsg">Drag playlists here to build your queue.</p>
+      </div>
+    </div>
+    <div class="panel-card qs-summary">
+      <h3 class="panel-title">Summary</h3>
+      <div id="qsSummary"><p class="empty-msg">Your queue summary will appear here.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 — PLAYER
+══════════════════════════════════════════ -->
+<div id="page-player" class="page">
+  <div class="player-layout">
+    <aside class="queue-panel">
+      <h3>Queue</h3>
+      <div id="queueList"></div>
+    </aside>
+    <div class="player-main">
+      <div class="vimeo-player">
+        <div id="vimeoEmbed" class="embed-placeholder">
+          <button class="play-center" onclick="playCurrentVideo()">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="player-controls">
+        <button class="ctrl-btn" onclick="togglePlay()">
+          <svg id="playPauseIcon" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <button class="ctrl-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <button class="ctrl-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
+      </div>
+      <div class="video-info">
+        <div>
+          <h2 id="playerVideoTitle">Video Title</h2>
+          <p id="playerVideoDuration" class="subtext">0:00</p>
+        </div>
+        <button class="btn-secondary" onclick="addCurrentToPlaylist()">Add to playlist</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 5 — BROWSE
+══════════════════════════════════════════ -->
+<div id="page-browse" class="page">
+  <div class="page-header"><h1>Browse</h1></div>
+  <div class="genre-cards-grid" id="browseGenres"></div>
+</div>
+
+</main>
+
+<!-- ══════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════ -->
+
+<!-- Save new playlist -->
+<div class="modal-backdrop" id="saveModal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Save Playlist</h3>
+    <label>Playlist name</label>
+    <input type="text" placeholder="e.g. Morning Calm" id="playlistNameInput"
+      onkeydown="if(event.key==='Enter')savePlaylist()" />
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeSaveModal()">Cancel</button>
+      <button class="btn-primary" onclick="savePlaylist()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Playlist editor — Spotify-style -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal modal-wide" onclick="event.stopPropagation()">
+    <div class="edit-modal-header">
+      <div class="edit-modal-dot" id="editModalDot"></div>
+      <input type="text" class="edit-name-input" id="editPlaylistName" placeholder="Playlist name" />
+      <p class="subtext" id="editVideoCount" style="margin-top:2px"></p>
+      <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="edit-modal-body">
+      <div class="edit-col">
+        <div class="edit-col-header">
+          <p class="section-label">Videos in playlist</p>
+          <p style="font-size:0.72rem;color:var(--text-muted)">Drag to reorder · click × to remove</p>
+        </div>
+        <div id="editPlaylistVideos" class="edit-video-list"></div>
+      </div>
+      <div class="edit-col">
+        <div class="edit-col-header">
+          <p class="section-label">Add more videos</p>
+        </div>
+        <div class="search-box" style="margin-bottom:10px">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search…" id="editSearch" oninput="filterEditVideos()" />
+        </div>
+        <div id="editAvailableVideos" class="edit-video-list"></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveEditedPlaylist()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule chooser -->
+<div class="modal-backdrop" id="scheduleChooser">
+  <div class="modal modal-chooser" onclick="event.stopPropagation()">
+    <h3>How would you like to schedule?</h3>
+    <p class="subtext" style="margin-bottom:24px">Choose how your playlists will be organized.</p>
+    <div class="chooser-cards">
+      <button class="chooser-card" onclick="closeChooserGo('schedule')">
+        <div class="chooser-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <strong>Schedule by Time of Day</strong>
+        <p>Assign playlists to specific time slots on a weekly calendar.</p>
+      </button>
+      <button class="chooser-card" onclick="closeChooserGo('queue-schedule')">
+        <div class="chooser-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5" fill="currentColor"/><circle cx="3" cy="12" r="1.5" fill="currentColor"/><circle cx="3" cy="18" r="1.5" fill="currentColor"/></svg>
+        </div>
+        <strong>Queue-Based Scheduling</strong>
+        <p>Arrange playlists in a sequential order that plays one after another.</p>
+      </button>
+    </div>
+    <button class="btn-ghost" style="margin-top:4px;width:100%;justify-content:center" onclick="closeScheduleChooser()">Cancel</button>
+  </div>
+</div>
+
+<!-- Vimeo config -->
+<div class="modal-backdrop" id="vimeoModal">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>Vimeo API Configuration</h3>
+    <p class="subtext">Enter your Vimeo credentials to load real videos.</p>
+    <label>Access Token</label>
+    <input type="password" placeholder="Your Vimeo access token" id="vimeoToken" />
+    <label>User ID <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+    <input type="text" placeholder="e.g. 12345678" id="vimeoUserId" />
+    <label>Folder / Album ID <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+    <input type="text" placeholder="e.g. 9876543" id="vimeoAlbumId" />
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeVimeoModal()">Cancel</button>
+      <button class="btn-primary" onclick="applyVimeoConfig()">Connect &amp; Load</button>
+    </div>
+    <p class="help-text">Get your token at <a href="https://developer.vimeo.com/apps" target="_blank">developer.vimeo.com/apps</a></p>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
